@@ -1,13 +1,32 @@
-<script setup lang="ts">
-import SnakeGame from './components/SnakeGame.vue'
-</script>
-
 <template>
-  <div class="game-wrapper">
-    <h1>SNAKE '90</h1>
-    <SnakeGame />
-  </div>
+  <nav>
+    <RouterLink to="/">Accueil</RouterLink>
+    <RouterLink to="/login">Login</RouterLink>
+    <RouterLink v-if="isAuthenticated" to="/profile">Profil</RouterLink>
+    <RouterLink v-if="isAuthenticated && $zitadel.hasRole('admin')" to="/admin"
+      >Admin</RouterLink
+    >
+
+    <button v-if="isAuthenticated" @click="$zitadel.oidcAuth.signOut()">
+      Se déconnecter
+    </button>
+  </nav>
+
+  <router-view />
 </template>
+
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+
+const isAuthenticated = ref(false);
+
+onMounted(async () => {
+  const zitadel = (window as any).$zitadel;
+  if (zitadel) {
+    isAuthenticated.value = await zitadel.oidcAuth.isAuthenticated();
+  }
+});
+</script>
 
 <style>
 .game-wrapper {
@@ -21,7 +40,7 @@ import SnakeGame from './components/SnakeGame.vue'
 }
 
 h1 {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   color: #2d2d2d;
   text-shadow: 3px 3px #9ba657;
   margin: 0;
